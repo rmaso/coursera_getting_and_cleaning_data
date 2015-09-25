@@ -23,6 +23,32 @@ toProcess <- which(grepl('mean\\(\\)', features$V2) | grepl('std\\(\\)', feature
 activities <- read.csv('./activity_labels.txt', header=FALSE, sep=' ')
 colnames(activities) <- c('idactivity', 'activity')
 
+# Load all files from train set
+x_train <- read.fwf('./train/X_train.txt', widths=rep(16, 561))
+y_train <- read.csv('./train/y_train.txt', header=FALSE)
+subject_train <- read.csv('./train/subject_train.txt', header=FALSE)
+
+# Save the loaded data into R format
+# save(x_train, y_train, subject_train, file='x_train.Rdata')
+# load("./x_train.Rdata")
+
+# Extracts only the measurements on the mean and standard deviation for each measurement. 
+x_train <- x_train[,toProcess]
+
+# Appropriately labels the data set with descriptive variable names from features file
+colnames(x_train) <- features$V2[toProcess]
+
+# Prepare the column Activity to use descriptive activity names to name the activities in the data set
+colnames(y_train) <- c('idactivity')
+y_train <- y_train %>% left_join(activities, by = 'idactivity')
+
+# Prepare column Subject
+colnames(subject_train) <- c('subject')
+
+# Create the train data frame with all the information
+train <- cbind(subject_train, y_train, x_train)
+
+
 # Load all files from test set
 x_test <- read.fwf('./test/X_test.txt', widths=rep(16, 561))
 y_test <- read.csv('./test/y_test.txt', header=FALSE)
@@ -48,30 +74,6 @@ colnames(subject_test) <- c('subject')
 # Create the test data frame with all the information
 test <- cbind(subject_test, y_test, x_test)
 
-# Load all files from train set
-x_train <- read.fwf('./train/X_train.txt', widths=rep(16, 561))
-y_train <- read.csv('./train/y_train.txt', header=FALSE)
-subject_train <- read.csv('./train/subject_train.txt', header=FALSE)
-
-# Save the loaded data into R format
-# save(x_train, y_train, subject_train, file='x_train.Rdata')
-# load("./x_train.Rdata")
-
-# Extracts only the measurements on the mean and standard deviation for each measurement. 
-x_train <- x_train[,toProcess]
-
-# Appropriately labels the data set with descriptive variable names from features file
-colnames(x_train) <- features$V2[toProcess]
-
-# Prepare the column Activity to use descriptive activity names to name the activities in the data set
-colnames(y_train) <- c('idactivity')
-y_train <- y_train %>% left_join(activities, by = 'idactivity')
-
-# Prepare column Subject
-colnames(subject_train) <- c('subject')
-
-# Create the train data frame with all the information
-train <- cbind(subject_train, y_train, x_train)
 
 # Merges the training and the test sets to create one data set.
 all <- rbind(train, test)
